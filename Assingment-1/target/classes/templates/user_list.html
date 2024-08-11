@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Assignment</title>
+  
+</head>
+<body>
+    <h1>User List</h1>
+    <a href="/users/new" style="float:right;"><button>Add New User</button></a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Phone</th>
+                <th>Enabled</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user : ${users}">
+                <td>
+                    <a th:href="@{'/users/edit/' + ${user.id}}" 
+                       th:if="${user.enabled}" 
+                       th:text="${user.fname}"></a>
+                    <span th:if="${!user.enabled}" 
+                          th:text="${user.fname}" 
+                          style="color:gray;"></span>
+                </td>
+                <td th:text="${user.lastname}"></td>
+                <td th:text="${user.phone}"></td>
+                <td>
+                    <input type="checkbox" 
+                           th:checked="${user.enabled}" 
+                           th:onchange="toggleEnableDisable([[${user.id}]], this.checked)"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	<script>
+	      function toggleEnableDisable(userId, isChecked) {            
+	          fetch(`/users/enable-disable/${userId}`, {
+	              method: 'POST',
+	              headers: {
+	                  'Content-Type': 'application/json',
+	              },
+	              body: JSON.stringify({ enabled: isChecked })
+	          })
+	          .then(response => response.text())
+	          .then(data => {
+	              console.log(`Server response: ${data}`);
+	              if (data === "Success") {
+
+	                  location.reload();
+	              } else {
+	                  alert("Failed to update user status.");
+	              }
+	          })
+	          .catch(error => {
+	              console.error('Error:', error);
+	              alert("An error occurred while updating user status.");
+	          });
+	      }
+	  </script>
+</body>
+</html>
